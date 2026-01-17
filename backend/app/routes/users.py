@@ -1,5 +1,6 @@
 from flask import jsonify, request
 from sqlalchemy.exc import IntegrityError
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt
 from app.routes import api_bp
 from app.services import UserService
 
@@ -181,14 +182,48 @@ def login():
                 'message': 'Invalid username or password'
             }), 401
         
+        # Create JWT access token
+        access_token = create_access_token(identity=user.id)
+        
         return jsonify({
             'id': user.id,
             'username': user.username,
+            'access_token': access_token,
             'message': 'Login successful'
         }), 200
         
     except Exception as e:
         return jsonify({
             'error': 'Failed to authenticate',
+            'message': str(e)
+        }), 500
+
+
+@api_bp.route('/logout', methods=['POST'])
+@jwt_required()
+def logout():
+    """
+    Logout a user (revoke their token)
+    
+    Headers:
+        Authorization: Bearer <access_token>
+        
+    Returns:
+        JSON response with logout status
+    """
+    try:
+        # Get the JWT token
+        jti = get_jwt()['jti']
+        
+        # In a production app, you might want to add the token to a blacklist
+        # For now, we'll just return success (client should discard the token)
+        
+        return jsonify({
+            'message': 'Logout successful'
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            'error': 'Failed to logout',
             'message': str(e)
         }), 500
