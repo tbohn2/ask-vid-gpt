@@ -45,6 +45,7 @@ def create_user():
     
     Request Body (JSON):
         username (str, required): Unique username for the user
+        password (str, required): Password for the user (will be hashed)
         
     Returns:
         JSON response with created user data
@@ -59,10 +60,18 @@ def create_user():
             }), 400
         
         username = data.get('username')
+        password = data.get('password')
+        
         if not username:
             return jsonify({
                 'error': 'Validation error',
                 'message': 'Username is required'
+            }), 400
+        
+        if not password:
+            return jsonify({
+                'error': 'Validation error',
+                'message': 'Password is required'
             }), 400
         
         # Check if username already exists
@@ -72,7 +81,7 @@ def create_user():
                 'message': f'Username "{username}" already exists'
             }), 409
         
-        user = UserService.create_user(username)
+        user = UserService.create_user(username, password)
         
         return jsonify({
             'id': user.id,
@@ -127,3 +136,59 @@ def delete_user(user_id):
             'message': str(e)
         }), 500
 
+
+@api_bp.route('/login', methods=['POST'])
+def login():
+    """
+    Authenticate a user with username and password
+    
+    Request Body (JSON):
+        username (str, required): Username of the user
+        password (str, required): Password of the user
+        
+    Returns:
+        JSON response with user data if authentication succeeds
+    """
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({
+                'error': 'Invalid request',
+                'message': 'Request body must be JSON'
+            }), 400
+        
+        username = data.get('username')
+        password = data.get('password')
+        
+        if not username:
+            return jsonify({
+                'error': 'Validation error',
+                'message': 'Username is required'
+            }), 400
+        
+        if not password:
+            return jsonify({
+                'error': 'Validation error',
+                'message': 'Password is required'
+            }), 400
+        
+        user = UserService.login(username, password)
+        
+        if not user:
+            return jsonify({
+                'error': 'Authentication failed',
+                'message': 'Invalid username or password'
+            }), 401
+        
+        return jsonify({
+            'id': user.id,
+            'username': user.username,
+            'message': 'Login successful'
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            'error': 'Failed to authenticate',
+            'message': str(e)
+        }), 500

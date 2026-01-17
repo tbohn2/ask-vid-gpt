@@ -1,28 +1,39 @@
 from typing import Optional, List
+from werkzeug.security import generate_password_hash, check_password_hash
 from app import db
 from app.models.models import User
 
 
 class UserService:
     @staticmethod
-    def create_user(username: str) -> User:
+    def create_user(username: str, password: str) -> User:
         """
-        Create a new user
+        Create a new user with hashed password
         
         Args:
             username: Unique username for the user
+            password: Plain text password to be hashed
             
         Returns:
             User: The created user object
             
         Raises:
-            ValueError: If username is empty or None
+            ValueError: If username or password is empty or None
             IntegrityError: If username already exists
         """
         if not username or not username.strip():
             raise ValueError("Username cannot be empty")
         
-        user = User(username=username.strip())
+        if not password:
+            raise ValueError("Password cannot be empty")
+        
+        # Hash the password before storing
+        hashed_password = generate_password_hash(password)
+        
+        user = User(
+            username=username.strip(),
+            password=hashed_password
+        )
         db.session.add(user)
         db.session.commit()
         return user
@@ -104,3 +115,39 @@ class UserService:
         """
         return User.query.filter_by(username=username).first() is not None
 
+    @staticmethod
+    def get_user_by_username(username: str) -> Optional[User]:
+        """
+        Get a user by their username
+        
+        Args:
+            username: The username to search for
+            
+        Returns:
+            User: The user object if found, None otherwise
+        """
+        return User.query.filter_by(username=username).first()
+
+    @staticmethod
+    def login(username: str, password: str) -> Optional[User]:
+        """
+        Authenticate a user by username and password
+        
+        Args:
+            username: The username to authenticate
+            password: The plain text password to verify
+            
+        Returns:
+            User: The user object if authentication succeeds, None otherwise
+        """
+        if not username or not password:
+            return None
+        
+        user = UserService.get_user_by_username(username)
+        if not user:
+            return None
+        
+        if not check_password_hash(user.password, password):
+            return None
+        
+        return user
