@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
@@ -13,7 +14,9 @@ def create_app(config_class=Config):
     """Application factory pattern"""
     app = Flask(__name__)
     app.config.from_object(config_class)
-    
+
+    CORS(app, origins=["http://localhost:3000"])
+
     # Initialize extensions
     db.init_app(app)
     migrate.init_app(app, db)
