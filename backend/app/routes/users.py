@@ -6,6 +6,7 @@ from app.services import UserService
 
 
 @api_bp.route('/users', methods=['GET'])
+@jwt_required()
 def get_all_users():
     """
     Get all users with optional pagination
@@ -108,6 +109,7 @@ def create_user():
 
 
 @api_bp.route('/users/<int:user_id>', methods=['DELETE'])
+@jwt_required()
 def delete_user(user_id):
     """
     Delete a user by ID

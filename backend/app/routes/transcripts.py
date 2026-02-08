@@ -1,10 +1,12 @@
 from flask import jsonify, request
+from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 from app.routes import api_bp
 from app.services import TranscriptService
 
 
 @api_bp.route('/transcripts', methods=['GET'])
+@jwt_required()
 def get_all_transcripts():
     """
     Get all transcripts with optional pagination and video filtering
@@ -47,6 +49,7 @@ def get_all_transcripts():
 
 
 @api_bp.route('/transcripts', methods=['POST'])
+@jwt_required()
 def create_transcript():
     """
     Create a new transcript
@@ -113,6 +116,7 @@ def create_transcript():
 
 
 @api_bp.route('/transcripts/<int:transcript_id>', methods=['GET'])
+@jwt_required()
 def get_transcript(transcript_id):
     """
     Get a transcript by ID
@@ -147,6 +151,7 @@ def get_transcript(transcript_id):
 
 
 @api_bp.route('/transcripts/<int:video_id>', methods=['GET'])
+@jwt_required()
 def get_transcripts_by_video(video_id):
     """
     Get all transcripts by video ID
@@ -177,6 +182,7 @@ def get_transcripts_by_video(video_id):
 
 
 @api_bp.route('/transcripts/<int:transcript_id>', methods=['DELETE'])
+@jwt_required()
 def delete_transcript(transcript_id):
     """
     Delete a transcript by ID

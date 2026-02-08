@@ -1,10 +1,12 @@
 from flask import jsonify, request
+from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 from app.routes import api_bp
 from app.services import VideoService
 
 
 @api_bp.route('/videos', methods=['GET'])
+@jwt_required()
 def get_all_videos():
     """
     Get all videos with optional pagination and collection filtering
@@ -49,6 +51,7 @@ def get_all_videos():
 
 
 @api_bp.route('/videos', methods=['POST'])
+@jwt_required()
 def create_video():
     """
     Create a new video
@@ -129,6 +132,7 @@ def create_video():
 
 
 @api_bp.route('/videos/<int:video_id>', methods=['GET'])
+@jwt_required()
 def get_video(video_id):
     """
     Get a video by ID
@@ -165,6 +169,7 @@ def get_video(video_id):
 
 
 @api_bp.route('/videos/<int:video_id>', methods=['PUT'])
+@jwt_required()
 def update_video(video_id):
     """
     Update a video by ID
@@ -229,6 +234,7 @@ def update_video(video_id):
 
 
 @api_bp.route('/videos/<int:video_id>', methods=['DELETE'])
+@jwt_required()
 def delete_video(video_id):
     """
     Delete a video by ID

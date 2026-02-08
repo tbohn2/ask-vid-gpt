@@ -1,10 +1,12 @@
 from flask import jsonify, request
+from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 from app.routes import api_bp
 from app.services import CollectionService
 
 
 @api_bp.route('/collections', methods=['GET'])
+@jwt_required()
 def get_all_collections():
     """
     Get all collections with optional pagination and user filtering
@@ -48,6 +50,7 @@ def get_all_collections():
 
 
 @api_bp.route('/collections', methods=['POST'])
+@jwt_required()
 def create_collection():
     """
     Create a new collection
@@ -118,6 +121,7 @@ def create_collection():
 
 
 @api_bp.route('/collections/<int:collection_id>', methods=['GET'])
+@jwt_required()
 def get_collection(collection_id):
     """
     Get a collection by ID
@@ -153,6 +157,7 @@ def get_collection(collection_id):
 
 
 @api_bp.route('/collections/<int:collection_id>', methods=['DELETE'])
+@jwt_required()
 def delete_collection(collection_id):
     """
     Delete a collection by ID
