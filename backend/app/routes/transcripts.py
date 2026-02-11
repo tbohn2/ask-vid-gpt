@@ -34,6 +34,7 @@ def get_all_transcripts():
             'id': transcript.id,
             'video_id': transcript.video_id,
             'content': transcript.content,
+            'chunk_index': getattr(transcript, 'chunk_index', 0),
             'created_at': transcript.created_at.isoformat() if transcript.created_at else None
         } for transcript in transcripts]
         
@@ -85,17 +86,21 @@ def create_transcript():
                 'message': 'Transcript content is required'
             }), 400
         
-        transcript = TranscriptService.create_transcript(
+        transcripts = TranscriptService.create_transcript(
             video_id=video_id,
             content=content
         )
-        
+        transcripts_data = [{
+            'id': t.id,
+            'video_id': t.video_id,
+            'content': t.content,
+            'chunk_index': t.chunk_index,
+            'created_at': t.created_at.isoformat() if t.created_at else None
+        } for t in transcripts]
         return jsonify({
-            'id': transcript.id,
-            'video_id': transcript.video_id,
-            'content': transcript.content,
-            'created_at': transcript.created_at.isoformat() if transcript.created_at else None,
-            'message': 'Transcript created successfully'
+            'transcripts': transcripts_data,
+            'count': len(transcripts_data),
+            'message': f'Transcript saved in {len(transcripts_data)} chunk(s)'
         }), 201
         
     except ValueError as e:
@@ -140,6 +145,7 @@ def get_transcript(transcript_id):
             'id': transcript.id,
             'video_id': transcript.video_id,
             'content': transcript.content,
+            'chunk_index': getattr(transcript, 'chunk_index', 0),
             'created_at': transcript.created_at.isoformat() if transcript.created_at else None
         }), 200
         
@@ -168,6 +174,7 @@ def get_transcripts_by_video(video_id):
             'id': transcript.id,
             'video_id': transcript.video_id,
             'content': transcript.content,
+            'chunk_index': getattr(transcript, 'chunk_index', 0),
             'created_at': transcript.created_at.isoformat() if transcript.created_at else None
         } for transcript in transcripts]
         return jsonify({

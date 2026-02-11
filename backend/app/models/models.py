@@ -43,8 +43,9 @@ class Transcript(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     video_id = db.Column(db.Integer, db.ForeignKey('videos.id'), nullable=False)
     content = db.Column(db.Text, nullable=False)
+    chunk_index = db.Column(db.Integer, nullable=False, default=0)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 
     def __repr__(self):
-        return f'<Transcript Video ID {self.video_id}, Language {self.language}>'
+        return f'<Transcript Video ID {self.video_id}, chunk {self.chunk_index}>'
 
