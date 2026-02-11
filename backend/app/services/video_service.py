@@ -2,6 +2,7 @@ from typing import Optional, List
 from app import db
 from app.models.models import Video
 from app.services.collection_service import CollectionService
+from youtube_transcript_api import YouTubeTranscriptApi
 
 
 class VideoService:
@@ -184,3 +185,20 @@ class VideoService:
             Video: The video object if found, None otherwise
         """
         return Video.query.filter_by(youtube_id=youtube_id).first()
+
+    @staticmethod
+    def get_video_transcript(youtube_id: str) -> Optional[str]:
+        """
+        Get the transcript of a video
+        
+        Args:
+            youtube_id: The YouTube ID of the video
+            
+        Returns:
+            str: The transcript of the video if found, None otherwise
+        """
+        try:
+            transcript = YouTubeTranscriptApi.get_transcript(youtube_id, languages=['en'])
+            return transcript
+        except Exception as e:
+            return None
