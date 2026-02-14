@@ -12,8 +12,8 @@ def auth_required(f):
     def decorated_function(*args, **kwargs):
         try:
             verify_jwt_in_request()
-            current_user_id = get_jwt_identity()
-            
+            current_user_id = int(get_jwt_identity())
+
             # Optionally verify user still exists
             user = UserService.get_user_by_id(current_user_id)
             if not user:
@@ -21,7 +21,7 @@ def auth_required(f):
                     'error': 'Unauthorized',
                     'message': 'User not found'
                 }), 401
-            
+
             # Attach user to request context for easy access
             request.current_user = user
             request.current_user_id = current_user_id
@@ -29,9 +29,10 @@ def auth_required(f):
         except Exception as e:
             return jsonify({
                 'error': 'Unauthorized',
-                'message': 'Invalid or missing authentication token'
+                'message': 'Invalid or missing authentication token',
+                'detail': str(e)
             }), 401
-        
+
         return f(*args, **kwargs)
     
     return decorated_function
@@ -51,6 +52,10 @@ def setup_auth_middleware(blueprint, exempt_routes=None):
     
     @blueprint.before_request
     def require_auth():
+        # CORS preflight: browser sends OPTIONS without Authorization header
+        if request.method == 'OPTIONS':
+            return None
+
         # Get the path (without /api prefix)
         path = request.path
         
@@ -80,8 +85,8 @@ def setup_auth_middleware(blueprint, exempt_routes=None):
         # For all other routes, require authentication
         try:
             verify_jwt_in_request()
-            current_user_id = get_jwt_identity()
-            
+            current_user_id = int(get_jwt_identity())
+
             # Verify user still exists
             user = UserService.get_user_by_id(current_user_id)
             if not user:
@@ -89,15 +94,16 @@ def setup_auth_middleware(blueprint, exempt_routes=None):
                     'error': 'Unauthorized',
                     'message': 'User not found'
                 }), 401
-            
+
             # Attach user to request context
             request.current_user = user
             request.current_user_id = current_user_id
-            
+
         except Exception as e:
             return jsonify({
                 'error': 'Unauthorized',
-                'message': 'Invalid or missing authentication token. Please login first.'
+                'message': 'Invalid or missing authentication token. Please login first.',
+                'detail': str(e)
             }), 401
         
         return None  # Allow request to proceed
