@@ -15,7 +15,8 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
-    CORS(app, origins=["http://localhost:3000"])
+    # CORS(app, origins=["http://localhost:3000"])
+    CORS(app, origins="*")
 
     # Initialize extensions
     db.init_app(app)
